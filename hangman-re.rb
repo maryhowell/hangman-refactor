@@ -9,7 +9,6 @@ check = false
 def randomword_generator
   db = File.open("/usr/share/dict/words").select { |x| (x.length > 3) && (x.length < 6)}
   return db
-
 end
 
 def chomp_word db
@@ -49,8 +48,32 @@ def play_again?
   again = gets.chomp
 end
 
+def check_input_for_a_letter input
+  check = false
+  until check
+    if ("a" .. "z").include?(input)
+      check = true
+    elsif input.length > 1
+      puts "please try another single letter"
+      input = gets.chomp
+    else puts "please try another single letter"
+      input = gets.chomp
+    end
+  end
+  input
+end
 
-
+def win_or_lose? board, randomword, guesses
+  if board == randomword
+    puts "YAY you won!!"
+    done = true
+  elsif guesses == 0
+    puts "You lost, Maybe next time"
+    puts "The word was #{randomword.join}"
+    done = true
+  end
+  done
+end
 
 
 #Game starts here
@@ -58,7 +81,7 @@ loop do
   db = randomword_generator
   puts " Welcome to Hangman"
   randomword = chomp_word(db)
-  puts "your word is #{randomword}" #need to comment out when finished
+  #puts "your word is #{randomword}" #need to comment out when finished
 
   board = board_init randomword
 
@@ -66,37 +89,20 @@ loop do
     puts "Hangman: " + board * " "
     puts "Letters Used: " + prevguess * " "
     puts "You have #{guesses} remaining guesses"
-    #choosing a letter and pushing letter choosen to the prevguess array
     puts "Choose a letter"
     input = gets.chomp
-    check = false
-    until check
-      if ("a" .. "z").include?(input)
-        check = true
-      elsif input.length > 1
-        puts "please try another single letter"
-        input = gets.chomp
-      else puts "please try another single letter"
-        input = gets.chomp
-      end
-    end
 
- some_data = record_compare_guess(randomword, input, board)
+    check_input_for_a_letter(input)
 
-  guesses = update_guess_left(board, input, guesses)
+    some_data = record_compare_guess(randomword, input, board)
 
-    if board == word
-      puts "YAY you won!!"
-    elsif guesses == 0
-      puts "You lost, Maybe next time"
-      puts "The word was #{randomword.join}"
-    end
+    guesses = update_guess_left(board, input, guesses)
+
+    done = win_or_lose?(board, randomword, guesses)
   end
-
   again = play_again?
-  # if again == "n"
+
   break if again == "n"
-  # end
   done = false
   guesses = 6
   prevguess = [ ]
